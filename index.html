@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>No Regrets – Sekar Agny</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="player-container">
+    <img src="cd.png" alt="Album art" class="cd-art" />
+    <audio id="audioPlayer" controls>
+      <source src="your-song.mp3" type="audio/mpeg">
+      Your browser does not support the audio element.
+    </audio>
+  </div>
+
+  <div class="chat-box">
+    <div id="chatMessages"></div>
+    <input id="chatInput" type="text" placeholder="Say something..." />
+    <button id="sendBtn">Send</button>
+  </div>
+
+  <div class="status-bar">
+    <span id="status">Offline</span>
+    <div class="social-links">
+      <a href="https://instagram.com/yourusername" target="_blank">IG</a>
+      <a href="https://tiktok.com/@yourusername" target="_blank">TT</a>
+    </div>
+    <button id="shareBtn">Share</button>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

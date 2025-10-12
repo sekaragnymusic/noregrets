@@ -1,0 +1,67 @@
+body {
+  font-family: Arial, sans-serif;
+  background-color: #fffdf8;
+  color: #222;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  margin: 0;
+}
+
+.player-container {
+  text-align: center;
+}
+
+.cd-art {
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  animation: rotate 8s linear infinite;
+}
+
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.chat-box {
+  width: 300px;
+  height: 200px;
+  border: 1px solid #aaa;
+  margin-top: 20px;
+  padding: 10px;
+  overflow-y: auto;
+  background: #f9f9f9;
+}
+
+#chatInput {
+  width: 70%;
+  padding: 5px;
+}
+
+#sendBtn {
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+.status-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 300px;
+  margin-top: 10px;
+  font-size: 14px;
+}
+
+.social-links a {
+  margin-left: 8px;
+  text-decoration: none;
+  color: #222;
+}
+
+#shareBtn {
+  padding: 5px 8px;
+  cursor: pointer;
+}
