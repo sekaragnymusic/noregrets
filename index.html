@@ -7,28 +7,42 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="player-container">
-    <img src="cd.png" alt="Album art" class="cd-art" />
-    <audio id="audioPlayer" controls>
-      <source src="your-song.mp3" type="audio/mpeg">
-      Your browser does not support the audio element.
-    </audio>
-  </div>
+  <main class="wrapper">
+    <!-- Header -->
+    <header>
+      <h1>No Regrets</h1>
+      <h2>by Sekar Agny</h2>
+    </header>
 
-  <div class="chat-box">
-    <div id="chatMessages"></div>
-    <input id="chatInput" type="text" placeholder="Say something..." />
-    <button id="sendBtn">Send</button>
-  </div>
+    <!-- Player -->
+    <section class="player">
+      <img src="cd.png" alt="Album art" class="cd-art" id="cdArt" />
+      <audio id="audioPlayer" controls>
+        <source src="your-song.mp3" type="audio/mpeg" />
+        Your browser does not support the audio element.
+      </audio>
+    </section>
 
-  <div class="status-bar">
-    <span id="status">Offline</span>
-    <div class="social-links">
-      <a href="https://instagram.com/yourusername" target="_blank">IG</a>
-      <a href="https://tiktok.com/@yourusername" target="_blank">TT</a>
-    </div>
-    <button id="shareBtn">Share</button>
-  </div>
+    <!-- Chat -->
+    <section class="chat">
+      <div id="chatMessages" class="chat-messages">
+        <p class="placeholder">Hi there👋</p>
+      </div>
+      <div class="chat-input">
+        <input id="chatInput" type="text" placeholder="Say something..." />
+        <button id="sendBtn">Send</button>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+      <div class="socials">
+        <a href="https://instagram.com/sekaragny" target="_blank">Instagram</a>
+        <a href="https://tiktok.com/@sekar.agny" target="_blank">TikTok</a>
+      </div>
+      <button id="shareBtn" class="share-btn">Share</button>
+    </footer>
+  </main>
 
   <script src="script.js"></script>
 </body>

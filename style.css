@@ -1,67 +1,118 @@
+@import url('https://fonts.googleapis.com/css2?family=Indie+Flower&display=swap');
+
+
 body {
-  font-family: Arial, sans-serif;
-  background-color: #fffdf8;
+  font-family: 'Indie Flower', cursive;
+  background: #fffef9 url('paper-texture.jpg');
+  background-size: cover;
+  background-position: center;
   color: #222;
   display: flex;
-  flex-direction: column;
-  align-items: center;
   justify-content: center;
-  height: 100vh;
-  margin: 0;
+  align-items: center;
+  min-height: 100vh;
 }
 
-.player-container {
+.wrapper {
+  width: 90%;
+  max-width: 400px;
   text-align: center;
 }
 
+/* Header */
+header h1 {
+  font-size: 1.8rem;
+  margin-bottom: 4px;
+}
+header h2 {
+  font-size: 1rem;
+  font-weight: normal;
+  margin-bottom: 20px;
+  color: #555;
+}
+
+/* Player */
+.player {
+  margin-bottom: 20px;
+}
 .cd-art {
   width: 180px;
   height: 180px;
   border-radius: 50%;
-  animation: rotate 8s linear infinite;
+  margin-bottom: 12px;
+  animation: spin 8s linear infinite;
+  animation-play-state: paused;
+}
+audio {
+  width: 100%;
 }
 
-@keyframes rotate {
+@keyframes spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
 
-.chat-box {
-  width: 300px;
-  height: 200px;
-  border: 1px solid #aaa;
-  margin-top: 20px;
+/* Chat */
+.chat {
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  background-color: #f9f9f9;
   padding: 10px;
+  margin-bottom: 15px;
+}
+.chat-messages {
+  height: 150px;
   overflow-y: auto;
-  background: #f9f9f9;
+  text-align: left;
+  margin-bottom: 8px;
 }
-
-#chatInput {
-  width: 70%;
-  padding: 5px;
+.chat-input {
+  display: flex;
+  gap: 6px;
 }
-
-#sendBtn {
-  padding: 5px 10px;
+.chat-input input {
+  flex: 1;
+  padding: 6px;
+}
+.chat-input button {
+  padding: 6px 10px;
   cursor: pointer;
 }
+.placeholder {
+  color: #999;
+  font-style: italic;
+}
 
-.status-bar {
+/* Footer */
+footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  width: 300px;
-  margin-top: 10px;
-  font-size: 14px;
+  margin-top: 8px;
 }
-
-.social-links a {
-  margin-left: 8px;
+.socials a {
   text-decoration: none;
-  color: #222;
+  color: #333;
+  margin-right: 8px;
+  font-size: 0.9rem;
 }
-
-#shareBtn {
-  padding: 5px 8px;
+.share-btn {
+  padding: 5px 10px;
   cursor: pointer;
+}
+.wrapper {
+  border: 3px dashed #333;
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  background-color: rgba(255,255,255,0.8);
+}
+button, input {
+  border: 2px solid #333;
+  border-radius: 8px;
+  background: #fff;
+  font-family: inherit;
+}
+button:hover {
+  background: #f2f2f2;
 }
