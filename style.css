@@ -12,6 +12,25 @@ body {
   align-items: center;
   min-height: 100vh;
 }
+/* --- Cover Art Box --- */
+.cover-box {
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: center;
+}
+
+header img.cover-image {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 2px solid #333;
+  margin-bottom: 10px;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
 
 .wrapper {
   width: 90%;
@@ -101,7 +120,7 @@ footer {
   cursor: pointer;
 }
 .wrapper {
-  border: 3px dashed #333;
+  border: 2px solid #333;
   border-radius: 20px;
   padding: 20px;
   box-shadow: 0 0 10px rgba(0,0,0,0.1);
