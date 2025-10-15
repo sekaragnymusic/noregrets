@@ -3,7 +3,7 @@
 
 body {
   font-family: 'Indie Flower', cursive;
-  background: #fffef9 url('./paper-texture.jpg');
+  background: #fffef9 url('/noregrets/paper-texture.jpg');
   background-size: cover;
   background-position: center;
   color: #222;
@@ -25,7 +25,7 @@ body {
   border: 2px solid #7c7c7c;
 
   /* Border image settings */
-  background-image: url('./border-frame.png');
+  background-image: url('/noregrets/border-frame.png');
   background-repeat: no-repeat;
   background-size: 100% 100%;
   background-position: center;
