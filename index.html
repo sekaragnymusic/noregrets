@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>No Regrets – Sekar Agny</title>
+  <title>Sekar Agny - No Regrets</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -18,12 +18,17 @@
 
     <!-- Player -->
     <section class="player">
-      <img src="cd.png" alt="Album art" class="cd-art" id="cdArt" />
-      <audio id="audioPlayer" controls>
-        <source src="your-song.mp3" type="audio/mpeg" />
-        Your browser does not support the audio element.
-      </audio>
+      <img src="cd.png" alt="Cd Art" class="cd-art" id="cdArt" />
+      <audio id="audioPlayer" controls preload="metadata" controlsList="nodownload noplaybackrate">
+  <source src="your-song.mp3" type="audio/mpeg" />
+</audio>
     </section>
+
+<!-- Online Status -->
+<div class="status-indicator" id="statusIndicator">
+  <span class="dot online"></span>
+  <span class="status-text">Agny is here! Hello!</span>
+</div>
 
     <!-- Chat -->
     <section class="chat">
@@ -39,11 +44,20 @@
     <!-- Footer -->
     <footer>
       <div class="socials">
-        <a href="https://instagram.com/sekaragny" target="_blank">Instagram</a>
-        <a href="https://tiktok.com/@sekar.agny" target="_blank">TikTok</a>
+        <a href="https://instagram.com/sekaragny" target="_blank">
+          <img src="icon-instagram.svg" alt="Instagram" class="icon" />
+        </a>
+        <a href="https://tiktok.com/@sekar.agny" target="_blank">
+          <img src="icon-tiktok.svg" alt="TikTok" class="icon" />
+        </a>
+        <a href="https://youtube.com/@sekaragny" target="_blank">
+          <img src="icon-youtube.svg" alt="YouTube" class="icon" />
+        </a>
       </div>
-      <button id="shareBtn" class="share-btn">Share</button>
-    </footer>
+      <button id="shareBtn" class="share-btn">
+        <img src="icon-share.svg" alt="Share" class="icon" />
+      </button> 
+  </footer>
   </main>
 
   <script src="script.js"></script>

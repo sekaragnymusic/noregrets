@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Rotation Test</title>
+<style>
+  .cd-art {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: url('cd.png') center/cover no-repeat;
+    transform-origin: center;
+  }
+</style>
+</head>
+<body>
+  <img src="cd.png" id="cdArt" class="cd-art">
+  <br>
+  <button id="start">Start</button>
+  <button id="stop">Stop</button>
+
+<script>
+const cdArt = document.getElementById("cdArt");
+let angle = 0;
+let rotating = false;
+
+function rotateFrame() {
+  if (!rotating) return;
+  angle = (angle + 0.3) % 360;
+  cdArt.style.transform = `rotate(${angle}deg)`;
+  requestAnimationFrame(rotateFrame);
+}
+
+document.getElementById("start").addEventListener("click", () => {
+  rotating = true;
+  requestAnimationFrame(rotateFrame);
+});
+
+document.getElementById("stop").addEventListener("click", () => {
+  rotating = false;
+});
+</script>
+</body>
+</html>

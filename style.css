@@ -11,46 +11,58 @@ body {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-}
-/* --- Cover Art Box --- */
-.cover-box {
-  margin-bottom: 20px;
-  display: flex;
-  justify-content: center;
+  margin: 0;
 }
 
+/* === Wrapper (Main Box) === */
+.wrapper {
+  width: 90%;
+  max-width: 360px;
+  text-align: center;
+  background-color: none;
+  padding: 14px;
+  border-radius: 18px;
+  border: 2px solid #7c7c7c;
+
+  /* Border image settings */
+  background-image: url('border-frame.png');
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  background-position: center;
+  border: none;
+}
+
+/* === Header === */
 header img.cover-image {
-  width: 100px;
-  height: 100px;
+  width: 80px;
+  height: 80px;
   object-fit: cover;
   border-radius: 10px;
-  border: 2px solid #333;
+  box-shadow: 0 4px 9px rgba(0, 0, 0, 0.25);
+  margin-top: 10px;
   margin-bottom: 10px;
   display: block;
   margin-left: auto;
   margin-right: auto;
 }
+header img.cover-image {
+  transition: transform 0.3s ease;
+}
 
-
-.wrapper {
-  width: 90%;
-  max-width: 360px;
-  text-align: center;
-  background-color: rgba(255, 255, 255, 0.85);
-  padding: 14px;
-  border-radius: 18px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+header img.cover-image:hover {
+  transform: scale(1.8);
 }
 
 /* Header */
 header h1 {
   font-size: 1.8rem;
-  margin-bottom: 2px;
+  margin-bottom: 0;
 }
 header h2 {
   font-size: 1rem;
   font-weight: normal;
   margin-bottom: 20px;
+  margin-top: 2px;
   color: #555;
 }
 
@@ -59,20 +71,48 @@ header h2 {
   margin-bottom: 20px;
 }
 .cd-art {
-  width: 160px;
-  height: 160px;
+  width: 200px;
+  height: 200px;
   border-radius: 50%;
   margin-bottom: 12px;
-  animation: spin 8s linear infinite;
-  animation-play-state: paused;
+  transform-origin: center;
+  will-change: transform;
+  backface-visibility: hidden;
+  transform: translateZ(0);
 }
 audio {
   width: 100%;
 }
 
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+/* === Online Status Indicator === */
+.status-indicator {
+  display: flex;
+  align-items: left;
+  justify-content: left;
+  margin-bottom: 6px;
+  gap: 10px;
+  font-size: 0.9rem;
+  font-weight: bold;
+  font-style: italic;
+}
+
+.status-indicator .dot {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.status-indicator .dot.online {
+  background-color: #65e585; /* green */
+}
+
+.status-indicator .dot.offline {
+  background-color: #e86c65; /* red */
+}
+
+.status-text {
+  color: #333;
 }
 
 /* Chat */
@@ -106,53 +146,120 @@ audio {
   font-style: italic;
 }
 
-/* Footer */
+/* === Footer === */
 footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 8px;
+  margin-top: 10px;
+  padding-top: 6px;
 }
-.socials a {
-  text-decoration: none;
-  color: #333;
-  margin-right: 8px;
-  font-size: 0.9rem;
+
+/* social icons container */
+.socials {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
+
+/* shared style for all icons */
+.icon {
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+  margin: 0 4px;
+  margin-bottom: 4px;
+  transition: transform 0.25s ease, filter 0.25s ease;
+  vertical-align: middle;
+}
+
+/* hover effect for all icons */
+.icon:hover {
+  transform: scale(1.15);
+  filter: brightness(1.2);
+}
+
+/* share button */
 .share-btn {
-  padding: 5px 10px;
+  background: none;
+  border: none;
+  padding: 0;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
-.wrapper {
-  border: 2px solid #333;
-  border-radius: 20px;
-  padding: 20px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
-  background-color: rgba(255,255,255,0.8);
+
+/* share icon slightly smaller */
+.share-btn .icon {
+  width: 28px;
+  height: 28px;
 }
+
+/* generic button + input styling */
 button, input {
-  border: 2px solid #333;
+  border: 1px solid #9a9a9a;
   border-radius: 8px;
   background: #fff;
   font-family: inherit;
 }
+
 button:hover {
   background: #f2f2f2;
 }
+
+/* === Audio Player Cleanup === */
+
+/* Hide download button (Chrome, Edge) */
+audio::-internal-media-controls-download-button {
+  display: none;
+}
+
+/* Hide playback speed menu (Safari, Chrome) */
+audio::-webkit-media-controls-playback-rate-button {
+  display: none !important;
+}
+
+/* Prevent download via right-click or overflow menu */
+audio::-webkit-media-controls-enclosure {
+  overflow: hidden;
+}
+
+/* === Safari-specific fix: hide playback speed menu === */
+audio::-webkit-media-controls-playback-rate-button {
+  display: none !important;
+  -webkit-appearance: none;
+}
+
+/* === Mobile Adjustments === */
 @media (max-width: 480px) {
   .wrapper {
     max-width: 320px;
     padding: 10px;
   }
+
   header img.cover-image {
     width: 90px;
     height: 90px;
   }
+
   .cd-art {
     width: 150px;
     height: 150px;
   }
+
   .chat-messages {
     height: 100px;
+  }
+
+  .icon {
+    width: 28px;
+    height: 28px;
+    margin: 0 3px;
+  }
+
+  .share-btn .icon {
+    width: 26px;
+    height: 26px;
   }
 }
