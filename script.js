@@ -116,27 +116,82 @@ shareBtn.addEventListener('click', () => {
   alert('Link copied! You can share it on Instagram or anywhere!');
 });
 
-// Manual toggle for now
-const statusIndicator = document.getElementById('statusIndicator');
-let online = true;
+// --- ARTIST ONLINE STATUS (Auto Mode via URL) ---
+const urlParams = new URLSearchParams(window.location.search);
+const IS_ARTIST_MODE = urlParams.get("eggny") === "54";
 
-function toggleStatus() {
-  const dot = statusIndicator.querySelector('.dot');
-  const text = statusIndicator.querySelector('.status-text');
-  if (online) {
-    dot.classList.remove('online');
-    dot.classList.add('offline');
-    text.textContent = 'Agny is not here, but you can talk to each other!';
-  } else {
-    dot.classList.remove('offline');
-    dot.classList.add('online');
-    text.textContent = 'Agny is here! Hello!';
-  }
-  online = !online;
+async function setOnlineStatus(isOnline) {
+  if (!IS_ARTIST_MODE) return; // skip for public users
+
+  const { error } = await supabase
+    .from("status")
+    .update({ online: isOnline })
+    .eq("id", 1);
+
+  if (error) console.error("⚠️ Error updating status:", error.message);
+  else console.log(`👤 Artist is now ${isOnline ? "ONLINE" : "OFFLINE"}`);
 }
 
-// Example: toggle every 5 seconds (you can delete this later)
-setInterval(toggleStatus, 5000);
+if (IS_ARTIST_MODE) {
+  console.log("🎤 Artist mode active");
+  setOnlineStatus(true);
+
+  window.addEventListener("beforeunload", () => {
+    const url = `${SUPABASE_URL}/rest/v1/status?id=eq.1`;
+    const payload = JSON.stringify([{ online: false }]);
+    const headers = {
+      "Content-Type": "application/json",
+      "apikey": SUPABASE_KEY,
+      "Authorization": `Bearer ${SUPABASE_KEY}`,
+      "Prefer": "return=minimal"
+    };
+
+    navigator.sendBeacon(url, new Blob([payload], { type: "application/json" }));
+    fetch(url, { method: "PATCH", headers, body: payload, keepalive: true });
+  });
+} else {
+  console.log("🎧 Listener mode active");
+}
+
+
+
+// --- REALTIME ARTIST STATUS INDICATOR ---
+const statusDot = document.querySelector(".status-indicator .dot");
+const statusText = document.querySelector(".status-indicator .status-text");
+
+// Function to update the indicator visually
+function updateArtistStatus(isOnline) {
+  if (isOnline) {
+    statusDot.classList.remove("offline");
+    statusDot.classList.add("online");
+    statusText.textContent = "Agny is here! Hello!";
+  } else {
+    statusDot.classList.remove("online");
+    statusDot.classList.add("offline");
+    statusText.textContent = "Agny is not here, but you can talk to each other!";
+  }
+}
+
+// Load the current status when page opens
+async function loadArtistStatus() {
+  const { data, error } = await supabase
+    .from("status")
+    .select("online")
+    .eq("id", 1)
+    .single();
+
+  if (!error && data) updateArtistStatus(data.online);
+}
+
+loadArtistStatus();
+
+// Listen for changes in real time
+supabase
+  .channel("public:status")
+  .on("postgres_changes", { event: "UPDATE", schema: "public", table: "status" }, (payload) => {
+    updateArtistStatus(payload.new.online);
+  })
+  .subscribe();
 
 
 
