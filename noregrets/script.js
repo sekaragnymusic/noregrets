@@ -132,6 +132,47 @@ async function setOnlineStatus(isOnline) {
   else console.log(`👤 Artist is now ${isOnline ? "ONLINE" : "OFFLINE"}`);
 }
 
+// --- HEARTBEAT: Keep artist online status alive ---
+let heartbeatInterval;
+
+if (IS_ARTIST_MODE) {
+  const HEARTBEAT_INTERVAL = 15000; // 15 seconds
+  const TIMEOUT_DURATION = 30000;   // 30 seconds of no ping = offline
+
+  async function sendHeartbeat() {
+    const { error } = await supabase
+      .from("status")
+      .update({
+        online: true,
+        updated_at: new Date().toISOString(), // optional extra column if you have it
+      })
+      .eq("id", 1);
+
+    if (error) console.error("⚠️ Heartbeat failed:", error.message);
+    else console.log("💓 Heartbeat sent at", new Date().toLocaleTimeString());
+  }
+
+  // Start heartbeat loop when page loads
+  heartbeatInterval = setInterval(sendHeartbeat, HEARTBEAT_INTERVAL);
+
+  // Stop heartbeat when leaving page
+  window.addEventListener("beforeunload", () => {
+    clearInterval(heartbeatInterval);
+
+    const url = `${SUPABASE_URL}/rest/v1/status?id=eq.1`;
+    const payload = JSON.stringify([{ online: false }]);
+    const headers = {
+      "Content-Type": "application/json",
+      "apikey": SUPABASE_KEY,
+      "Authorization": `Bearer ${SUPABASE_KEY}`,
+      "Prefer": "return=minimal"
+    };
+
+    navigator.sendBeacon(url, new Blob([payload], { type: "application/json" }));
+    fetch(url, { method: "PATCH", headers, body: payload, keepalive: true });
+  });
+}
+
 if (IS_ARTIST_MODE) {
   console.log("🎤 Artist mode active");
   setOnlineStatus(true);
