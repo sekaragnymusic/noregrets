@@ -132,33 +132,101 @@ async function setOnlineStatus(isOnline) {
   else console.log(`👤 Artist is now ${isOnline ? "ONLINE" : "OFFLINE"}`);
 }
 
-// --- HEARTBEAT: Keep artist online status alive ---
-let heartbeatInterval;
+/* -------------------------------------------------------
+   ARTIST ONLINE STATUS + HEARTBEAT + STALE CHECK
+-------------------------------------------------------- */
 
+// --- URL param toggle (artist vs listener) ---
+const urlParams = new URLSearchParams(window.location.search);
+const IS_ARTIST_MODE = urlParams.get("artist") === "1";
+
+// --- HTML references ---
+const statusDot = document.querySelector(".status-indicator .dot");
+const statusText = document.querySelector(".status-indicator .status-text");
+
+// --- helper UI functions ---
+function showOnlineUI() {
+  statusDot.classList.remove("offline");
+  statusDot.classList.add("online");
+  statusText.textContent = "Agny is here! Hello!";
+}
+
+function showOfflineUI() {
+  statusDot.classList.remove("online");
+  statusDot.classList.add("offline");
+  statusText.textContent = "Agny is not here, but you can talk to each other!";
+}
+
+// --- timestamp freshness helper ---
+function isFreshTimestamp(ts, thresholdMs = 35000) {
+  if (!ts) return false;
+  const last = new Date(ts).getTime();
+  return Date.now() - last < thresholdMs;
+}
+
+// --- load initial status for listeners ---
+async function loadArtistStatus() {
+  const { data, error } = await supabase
+    .from("status")
+    .select("online, updated_at")
+    .eq("id", 1)
+    .single();
+
+  if (error) {
+    console.error("Error loading status:", error.message);
+    showOfflineUI();
+    return;
+  }
+
+  const online = data?.online === true && isFreshTimestamp(data?.updated_at);
+  if (online) showOnlineUI();
+  else showOfflineUI();
+}
+
+loadArtistStatus();
+
+// --- realtime listener for all users ---
+supabase
+  .channel("public:status")
+  .on(
+    "postgres_changes",
+    { event: "UPDATE", schema: "public", table: "status" },
+    (payload) => {
+      const { online, updated_at } = payload.new;
+      const fresh = online === true && isFreshTimestamp(updated_at);
+      if (fresh) showOnlineUI();
+      else showOfflineUI();
+    }
+  )
+  .subscribe();
+
+// ---------------------------------------------------------
+// --- ARTIST heartbeat + safe cleanup ---
 if (IS_ARTIST_MODE) {
-  const HEARTBEAT_INTERVAL = 15000; // 15 seconds
-  const TIMEOUT_DURATION = 30000;   // 30 seconds of no ping = offline
+  console.log("🎤 Artist mode active");
 
-  async function sendHeartbeat() {
+  // Immediately go online
+  await supabase.from("status")
+    .update({ online: true, updated_at: new Date().toISOString() })
+    .eq("id", 1);
+
+  // send heartbeat every 15s
+  const HEARTBEAT_INTERVAL = 15000;
+  const heartbeat = setInterval(async () => {
     const { error } = await supabase
       .from("status")
       .update({
         online: true,
-        updated_at: new Date().toISOString(), // optional extra column if you have it
+        updated_at: new Date().toISOString(),
       })
       .eq("id", 1);
-
     if (error) console.error("⚠️ Heartbeat failed:", error.message);
     else console.log("💓 Heartbeat sent at", new Date().toLocaleTimeString());
-  }
+  }, HEARTBEAT_INTERVAL);
 
-  // Start heartbeat loop when page loads
-  heartbeatInterval = setInterval(sendHeartbeat, HEARTBEAT_INTERVAL);
-
-  // Stop heartbeat when leaving page
+  // mark offline when page closes
   window.addEventListener("beforeunload", () => {
-    clearInterval(heartbeatInterval);
-
+    clearInterval(heartbeat);
     const url = `${SUPABASE_URL}/rest/v1/status?id=eq.1`;
     const payload = JSON.stringify([{ online: false }]);
     const headers = {
@@ -167,50 +235,11 @@ if (IS_ARTIST_MODE) {
       "Authorization": `Bearer ${SUPABASE_KEY}`,
       "Prefer": "return=minimal"
     };
-
-    navigator.sendBeacon(url, new Blob([payload], { type: "application/json" }));
-    fetch(url, { method: "PATCH", headers, body: payload, keepalive: true });
-  });
-}
-
-if (IS_ARTIST_MODE) {
-  console.log("🎤 Artist mode active");
-  setOnlineStatus(true);
-
-  window.addEventListener("beforeunload", () => {
-    const url = `${SUPABASE_URL}/rest/v1/status?id=eq.1`;
-    const payload = JSON.stringify([{ online: false }]);
-    const headers = {
-      "Content-Type": "application/json",
-      "apikey": SUPABASE_KEY,
-      "Authorization": `Bearer ${SUPABASE_KEY}`,
-      "Prefer": "return=minimal"
-    };
-
     navigator.sendBeacon(url, new Blob([payload], { type: "application/json" }));
     fetch(url, { method: "PATCH", headers, body: payload, keepalive: true });
   });
 } else {
   console.log("🎧 Listener mode active");
-}
-
-
-
-// --- REALTIME ARTIST STATUS INDICATOR ---
-const statusDot = document.querySelector(".status-indicator .dot");
-const statusText = document.querySelector(".status-indicator .status-text");
-
-// Function to update the indicator visually
-function updateArtistStatus(isOnline) {
-  if (isOnline) {
-    statusDot.classList.remove("offline");
-    statusDot.classList.add("online");
-    statusText.textContent = "Agny is here! Hello!";
-  } else {
-    statusDot.classList.remove("online");
-    statusDot.classList.add("offline");
-    statusText.textContent = "Agny is not here, but you can talk to each other!";
-  }
 }
 
 // Load the current status when page opens
