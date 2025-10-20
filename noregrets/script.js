@@ -111,33 +111,6 @@ audio.addEventListener("play", startRotation);
 audio.addEventListener("pause", stopRotation);
 audio.addEventListener("ended", stopRotation);
 
-
-// --- SEND MESSAGE TO SUPABASE ---
-const nameInput = document.getElementById("nameInput");
-const chatInput = document.getElementById("chatInput");
-const sendBtn = document.getElementById("sendBtn");
-const chatMessages = document.getElementById("chatMessages");
-
-sendBtn.addEventListener("click", sendMessage);
-chatInput.addEventListener("keypress", (e) => {
-  if (e.key === "Enter") sendMessage();
-});
-
-async function sendMessage() {
-  const text = chatInput.value.trim();
-  if (!text) return;
-
-  const name = nameInput.value.trim() || "Anonymous";
-  const is_artist = IS_ARTIST_MODE; // reuse your secret-link flag
-
-  const { error } = await supabase
-    .from("messages")
-    .insert([{ name, text, is_artist }]);
-
-  if (error) console.error("❌ Error sending:", error.message);
-  chatInput.value = "";
-}
-
 // --- ARTIST ONLINE STATUS (Auto Mode via URL) ---
 const urlParams = new URLSearchParams(window.location.search);
 const IS_ARTIST_MODE = urlParams.get("eggny") === "54";
