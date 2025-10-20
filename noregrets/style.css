@@ -150,9 +150,9 @@ audio {
 
 /* Shorter name input */
 #nameInput {
-  flex: 0 0 28%;
+  flex:0 0 18%;
   padding: 6px;
-  border: 2px solid #333;
+  border: 1px solid #333;
   border-radius: 8px;
   background: #fff;
   font-family: inherit;
@@ -160,9 +160,9 @@ audio {
 
 /* Wider message input */
 #chatInput {
-  flex: 1;
+  flex: 1 1 auto;
   padding: 6px;
-  border: 2px solid #333;
+  border: 1px solid #333;
   border-radius: 8px;
   background: #fff;
   font-family: inherit;
@@ -170,15 +170,17 @@ audio {
 
 /* Send button */
 #sendBtn {
-  padding: 6px 12px;
-  border: 2px solid #333;
+  flex: 0 0 70px
+  padding: 6px 0;
+  border: 1px solid #333;
+  text-align: center;
   border-radius: 8px;
   background: #fff;
   cursor: pointer;
   transition: background 0.2s ease;
 }
 #sendBtn:hover {
-  background: #f2f2f2;
+  background: #9edfb8;
 }
 
 /* Placeholder style */
@@ -187,10 +189,11 @@ audio {
   font-style: italic;
 }
 
-/* --- Mobile: stack inputs vertically --- */
+/* --- Mobile adjustment --- */
 @media (max-width: 480px) {
   .chat-input {
     flex-direction: column;
+    align-items: stretch;
   }
   #nameInput, #chatInput, #sendBtn {
     flex: 1 1 100%;
