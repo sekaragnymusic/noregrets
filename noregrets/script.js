@@ -52,33 +52,19 @@ async function sendMessage() {
   if (!text) return;
 
   // --- Assign persistent random emoji for anonymous users ---
-let savedEmoji = sessionStorage.getItem("chatEmoji");
+  let savedEmoji = sessionStorage.getItem("chatEmoji");
 
-if (!savedEmoji) {
-  const emojiList = ["😺", "🐸", "🐻", "🐰", "🐼", "🦊", "🐨", "🐢", "🦋", "🐧", "🐙", "🐝", "🐞", "🌸", "⭐"];
-  savedEmoji = emojiList[Math.floor(Math.random() * emojiList.length)];
-  sessionStorage.setItem("chatEmoji", savedEmoji);
-}
-
-// use typed name or persistent emoji
-const name = nameInput.value.trim() || savedEmoji;
-
-  const is_artist = IS_ARTIST_MODE || false; // if secret link, mark as artist
-
-  const { error } = await supabase
-    .from("messages")
-    .insert([{ name, text, is_artist }]);
-
-  if (error) {
-    console.error("❌ Error sending message:", error.message);
-    return;
+  if (!savedEmoji) {
+    const emojiList = ["😺", "🐸", "🐻", "🐰", "🐼", "🦊", "🐨", "🐢", "🦋", "🐧", "🐙", "🐝", "🐞", "🌸", "⭐"];
+    savedEmoji = emojiList[Math.floor(Math.random() * emojiList.length)];
+    sessionStorage.setItem("chatEmoji", savedEmoji);
   }
 
-  console.log("✅ Message sent:", text);
-  chatInput.value = ""; // clear input after send
-}
+  // use typed name or persistent emoji
+  const name = nameInput.value.trim() || savedEmoji;
+  const is_artist = IS_ARTIST_MODE || false; // if secret link, mark as artist
 
-// === Immediately show message locally (prevents undefined flash) ===
+  // === Immediately show message locally (prevents undefined flash) ===
   const tempMessage = {
     name,
     text,
@@ -86,7 +72,8 @@ const name = nameInput.value.trim() || savedEmoji;
     created_at: new Date().toISOString(),
   };
   appendTempMessage(tempMessage);
- // === Send message to Supabase ===
+
+  // === Send message to Supabase ===
   const { error } = await supabase
     .from("messages")
     .insert([{ name, text, is_artist }]);
@@ -118,6 +105,7 @@ function appendTempMessage(msg) {
   chatMessages.appendChild(div);
   chatMessages.scrollTop = chatMessages.scrollHeight;
 }
+
 
 // --- 👂 INITIAL LOAD + REALTIME LISTENER ---
 loadMessages();
