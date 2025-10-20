@@ -7,36 +7,9 @@ const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 console.log("✅ Connected to Supabase");
 
-// --- LOAD & DISPLAY CHAT MESSAGES ---
-
+// --- LOAD + DISPLAY MESSAGES ---
 const chatMessages = document.getElementById("chatMessages");
 
-// Function to render one message
-function renderMessage(msg) {
-  const p = document.createElement("p");
-  p.textContent = msg.text;
-  chatMessages.appendChild(p);
-}
-
-// Fetch all existing messages once
-async function loadMessages() {
-  const { data, error } = await supabase
-    .from("messages")
-    .select("*")
-    .order("created_at", { ascending: true });
-
-  if (error) {
-    console.error("❌ Error loading messages:", error.message);
-    return;
-  }
-
-  chatMessages.innerHTML = ""; // clear placeholder
-  data.forEach(renderMessage);
-}
-
-loadMessages(); // call once when page loads
-
-// --- LOAD + DISPLAY MESSAGES ---
 async function loadMessages() {
   const { data, error } = await supabase
     .from("messages")
@@ -64,7 +37,37 @@ function renderMessages(data) {
   chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
-// initial + realtime
+// --- SEND MESSAGE TO SUPABASE ---
+const nameInput = document.getElementById("nameInput");
+const chatInput = document.getElementById("chatInput");
+const sendBtn = document.getElementById("sendBtn");
+
+sendBtn.addEventListener("click", sendMessage);
+chatInput.addEventListener("keypress", (e) => {
+  if (e.key === "Enter") sendMessage();
+});
+
+async function sendMessage() {
+  const text = chatInput.value.trim();
+  if (!text) return;
+
+  const name = nameInput.value.trim() || "Anonymous";
+  const is_artist = IS_ARTIST_MODE || false; // if secret link, mark as artist
+
+  const { error } = await supabase
+    .from("messages")
+    .insert([{ name, text, is_artist }]);
+
+  if (error) {
+    console.error("❌ Error sending message:", error.message);
+    return;
+  }
+
+  console.log("✅ Message sent:", text);
+  chatInput.value = ""; // clear input after send
+}
+
+// --- 👂 INITIAL LOAD + REALTIME LISTENER ---
 loadMessages();
 supabase
   .channel("public:messages")
@@ -72,18 +75,6 @@ supabase
     renderMessages([...chatMessages.children].map(c => c.dataset), [payload.new]);
     loadMessages(); // simplest refresh
   })
-  .subscribe();
-
-// --- Listen for new messages in real time ---
-supabase
-  .channel("public:messages")
-  .on(
-    "postgres_changes",
-    { event: "INSERT", schema: "public", table: "messages" },
-    (payload) => {
-      renderMessage(payload.new);
-    }
-  )
   .subscribe();
 
 
