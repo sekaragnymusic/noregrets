@@ -155,7 +155,7 @@ audio {
   flex: 0 0 30%;
   max-width: 30%;
   padding: 6px;
-  border: 1px solid #333;
+  border: 1px solid #ccc;
   border-radius: 8px;
   background: #fff;
   font-family: inherit;
@@ -167,7 +167,7 @@ audio {
   flex: 1 1 80%;
   max-width: 80%;
   padding: 6px;
-  border: 1px solid #333;
+  border: 1px solid #ccc;
   border-radius: 8px;
   background: #fff;
   font-family: inherit;
@@ -178,7 +178,7 @@ audio {
 #sendBtn {
   flex: 0 0 70px
   padding: 6px 0;
-  border: 1px solid #333;
+  border: 1px solid #ccc;
   text-align: center;
   border-radius: 8px;
   background: #fff;
