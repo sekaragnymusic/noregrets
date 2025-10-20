@@ -51,7 +51,18 @@ async function sendMessage() {
   const text = chatInput.value.trim();
   if (!text) return;
 
-  const name = nameInput.value.trim() || "Anonymous";
+  // --- Assign persistent random emoji for anonymous users ---
+let savedEmoji = sessionStorage.getItem("chatEmoji");
+
+if (!savedEmoji) {
+  const emojiList = ["😺", "🐸", "🐻", "🐰", "🐼", "🦊", "🐨", "🐢", "🦋", "🐧", "🐙", "🐝", "🐞", "🌸", "⭐"];
+  savedEmoji = emojiList[Math.floor(Math.random() * emojiList.length)];
+  sessionStorage.setItem("chatEmoji", savedEmoji);
+}
+
+// use typed name or persistent emoji
+const name = nameInput.value.trim() || savedEmoji;
+
   const is_artist = IS_ARTIST_MODE || false; // if secret link, mark as artist
 
   const { error } = await supabase
