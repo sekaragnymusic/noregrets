@@ -131,7 +131,7 @@ audio {
 }
 .chat-input {
   display: flex;
-  gap: 6px;
+  gap: 10px;
 }
 .chat-input input {
   flex: 1;
@@ -153,6 +153,25 @@ footer {
   align-items: center;
   margin-top: 10px;
   padding-top: 6px;
+}
+.msg-time {
+  color: #aaa;
+  font-size: 0.75rem;
+  margin-right: 4px;
+}
+
+.msg-name {
+  font-weight: bold;
+  margin-right: 4px;
+}
+
+.msg-name.artist {
+  color: #52d0f4; /* your signature color */
+  font-family: 'Indie Flower', cursive;
+}
+
+.msg-text {
+  color: #333;
 }
 
 /* social icons container */

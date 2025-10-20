@@ -36,6 +36,44 @@ async function loadMessages() {
 
 loadMessages(); // call once when page loads
 
+// --- LOAD + DISPLAY MESSAGES ---
+async function loadMessages() {
+  const { data, error } = await supabase
+    .from("messages")
+    .select("name, text, is_artist, created_at")
+    .order("created_at", { ascending: true });
+
+  if (error) return console.error("❌ Load error:", error.message);
+  renderMessages(data);
+}
+
+function renderMessages(data) {
+  chatMessages.innerHTML = "";
+  data.forEach((msg) => {
+    const div = document.createElement("div");
+    const time = new Date(msg.created_at).toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
+    div.innerHTML = `<span class="msg-time">[${time}]</span>
+      <span class="msg-name ${msg.is_artist ? "artist" : ""}">${msg.name}:</span>
+      <span class="msg-text">${msg.text}</span>`;
+    chatMessages.appendChild(div);
+  });
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+// initial + realtime
+loadMessages();
+supabase
+  .channel("public:messages")
+  .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, (payload) => {
+    renderMessages([...chatMessages.children].map(c => c.dataset), [payload.new]);
+    loadMessages(); // simplest refresh
+  })
+  .subscribe();
+
 // --- Listen for new messages in real time ---
 supabase
   .channel("public:messages")
@@ -84,37 +122,30 @@ audio.addEventListener("ended", stopRotation);
 
 
 // --- SEND MESSAGE TO SUPABASE ---
-const chatInput = document.getElementById('chatInput');
-const sendBtn = document.getElementById('sendBtn');
+const nameInput = document.getElementById("nameInput");
+const chatInput = document.getElementById("chatInput");
+const sendBtn = document.getElementById("sendBtn");
+const chatMessages = document.getElementById("chatMessages");
 
-sendBtn.addEventListener("click", async () => {
+sendBtn.addEventListener("click", sendMessage);
+chatInput.addEventListener("keypress", (e) => {
+  if (e.key === "Enter") sendMessage();
+});
+
+async function sendMessage() {
   const text = chatInput.value.trim();
   if (!text) return;
 
-  console.log("Attempting to insert:", { text });
+  const name = nameInput.value.trim() || "Anonymous";
+  const is_artist = IS_ARTIST_MODE; // reuse your secret-link flag
 
-  const { data, error } = await supabase
+  const { error } = await supabase
     .from("messages")
-    .insert([{ name: "Anonymous", text }]);
+    .insert([{ name, text, is_artist }]);
 
-  console.log("Response:", { data, error });
-
-  if (error) {
-    console.error("❌ Error sending message:", error.message);
-    return;
-  }
-
-  console.log("✅ Message sent:", data);
-  chatInput.value = ""; // clear input
-});
-
-// --- Share button ---
-const shareBtn = document.getElementById('shareBtn');
-shareBtn.addEventListener('click', () => {
-  const url = window.location.href;
-  navigator.clipboard.writeText(url);
-  alert('Link copied! You can share it on Instagram or anywhere!');
-});
+  if (error) console.error("❌ Error sending:", error.message);
+  chatInput.value = "";
+}
 
 // --- ARTIST ONLINE STATUS (Auto Mode via URL) ---
 const urlParams = new URLSearchParams(window.location.search);
