@@ -78,6 +78,47 @@ const name = nameInput.value.trim() || savedEmoji;
   chatInput.value = ""; // clear input after send
 }
 
+// === Immediately show message locally (prevents undefined flash) ===
+  const tempMessage = {
+    name,
+    text,
+    is_artist,
+    created_at: new Date().toISOString(),
+  };
+  appendTempMessage(tempMessage);
+ // === Send message to Supabase ===
+  const { error } = await supabase
+    .from("messages")
+    .insert([{ name, text, is_artist }]);
+
+  if (error) {
+    console.error("❌ Error sending message:", error.message);
+  } else {
+    console.log("✅ Message sent:", text);
+  }
+
+  chatInput.value = ""; // clear input after send
+}
+
+// --- TEMPORARY LOCAL MESSAGE RENDER ---
+function appendTempMessage(msg) {
+  const div = document.createElement("div");
+  const time = new Date(msg.created_at).toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
+  div.innerHTML = `
+    <span class="msg-time">[${time}]</span>
+    <span class="msg-name ${msg.is_artist ? "artist" : ""}">${msg.name}:</span>
+    <span class="msg-text">${msg.text}</span>
+  `;
+
+  const chatMessages = document.getElementById("chatMessages");
+  chatMessages.appendChild(div);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
 // --- 👂 INITIAL LOAD + REALTIME LISTENER ---
 loadMessages();
 supabase
