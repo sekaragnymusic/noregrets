@@ -142,36 +142,42 @@ audio {
   border-radius: 10px;
 }
 
-/* --- Input area --- */
+/* --- Input Row (full width horizontal) --- */
 .chat-input {
   display: flex;
+  align-items: stretch;
+  width: 100%;
   gap: 6px;
 }
 
-/* Shorter name input */
+/* Name input = 30% width */
 #nameInput {
-  flex:0 0 18%;
+  flex: 0 0 30%;
+  max-width: 30%;
   padding: 6px;
   border: 1px solid #333;
   border-radius: 8px;
   background: #fff;
   font-family: inherit;
+  box-sizing: border-box;
 }
 
-/* Wider message input */
+/* Chat input = 80% width minus send button */
 #chatInput {
-  flex: 1 1 auto;
+  flex: 1 1 80%;
+  max-width: 80%;
   padding: 6px;
   border: 1px solid #333;
   border-radius: 8px;
   background: #fff;
   font-family: inherit;
+  box-sizing: border-box;
 }
 
 /* Send button */
 #sendBtn {
   flex: 0 0 70px
-  padding: 6px 0;
+  padding: 10px 0;
   border: 1px solid #333;
   text-align: center;
   border-radius: 8px;
