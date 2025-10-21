@@ -176,7 +176,7 @@ audio {
 
 /* Send button */
 #sendBtn {
-  flex: 0 0 70px
+  flex: 0 0 70px;
   padding: 6px 0;
   border: 1px solid #ccc;
   text-align: center;

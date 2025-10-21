@@ -111,11 +111,10 @@ function appendTempMessage(msg) {
 loadMessages();
 supabase
   .channel("public:messages")
-  .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, (payload) => {
-    renderMessages([...chatMessages.children].map(c => c.dataset), [payload.new]);
-    loadMessages(); // simplest refresh
-  })
-  .subscribe();
+ .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, (payload) => {
+  if (payload?.new?.text) appendTempMessage(payload.new);
+})
+
 
 
 // --- Reliable CD rotation driven by audio events ---
