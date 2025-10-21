@@ -10,10 +10,16 @@ console.log("✅ Connected to Supabase");
 // --- LOAD + DISPLAY MESSAGES ---
 const chatMessages = document.getElementById("chatMessages");
 
+// --- LOAD + DISPLAY MESSAGES (last 24 hours only) ---
 async function loadMessages() {
+  const now = new Date();
+  const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000); // 24 hours ago
+  const since = yesterday.toISOString();
+
   const { data, error } = await supabase
     .from("messages")
     .select("name, text, is_artist, created_at")
+    .gte("created_at", since) // only messages newer than 24h
     .order("created_at", { ascending: true });
 
   if (error) return console.error("❌ Load error:", error.message);
@@ -21,6 +27,10 @@ async function loadMessages() {
 }
 
 function renderMessages(data) {
+  const shouldScroll =
+    chatMessages.scrollTop + chatMessages.clientHeight >=
+    chatMessages.scrollHeight - 50; // detect if user is near bottom
+
   chatMessages.innerHTML = "";
   data.forEach((msg) => {
     const div = document.createElement("div");
@@ -29,12 +39,21 @@ function renderMessages(data) {
       minute: "2-digit",
     });
 
-    div.innerHTML = `<span class="msg-time">[${time}]</span>
+    div.innerHTML = `
+      <span class="msg-time">[${time}]</span>
       <span class="msg-name ${msg.is_artist ? "artist" : ""}">${msg.name}:</span>
-      <span class="msg-text">${msg.text}</span>`;
+      <span class="msg-text">${msg.text}</span>
+    `;
     chatMessages.appendChild(div);
   });
-  chatMessages.scrollTop = chatMessages.scrollHeight;
+
+  // --- Smooth autoscroll only if user was already near bottom ---
+  if (shouldScroll) {
+    chatMessages.scrollTo({
+      top: chatMessages.scrollHeight,
+      behavior: "smooth",
+    });
+  }
 }
 
 // --- SEND MESSAGE TO SUPABASE ---
@@ -71,7 +90,6 @@ async function sendMessage() {
     is_artist,
     created_at: new Date().toISOString(),
   };
-  appendTempMessage(tempMessage);
 
   // === Send message to Supabase ===
   const { error } = await supabase
@@ -108,13 +126,15 @@ function appendTempMessage(msg) {
 
 
 // --- 👂 INITIAL LOAD + REALTIME LISTENER ---
-loadMessages();
+loadMessages();sendMessage
 supabase
   .channel("public:messages")
- .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, (payload) => {
-  if (payload?.new?.text) appendTempMessage(payload.new);
-})
-
+  .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, (payload) => {
+    const msgTime = new Date(payload.new.created_at);
+    const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    if (msgTime >= cutoff) appendTempMessage(payload.new); // only append if fresh
+  })
+  .subscribe();
 
 
 // --- Reliable CD rotation driven by audio events ---
@@ -243,7 +263,7 @@ function updateArtistStatus(isOnline) {
   } else {
     statusDot.classList.remove("online");
     statusDot.classList.add("offline");
-    statusText.textContent = "Agny is not here, but you can talk to each other!";
+    statusText.textContent = "Agny is not here, but you can talk to each other :)";
   }
 }
 
@@ -268,5 +288,255 @@ supabase
   })
   .subscribe();
 
+// --- SHARE BUTTON FEATURE ---
+const shareBtn = document.getElementById("shareBtn");
+
+if (shareBtn) {
+  shareBtn.addEventListener("click", async () => {
+    const shareUrl = window.location.href;
+    const shareText = "Listen to 'No Regrets' by Agny 🎧";
+
+    // Native mobile share first
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: document.title, text: shareText, url: shareUrl });
+        console.log("✅ Shared via native share sheet");
+        return;
+      } catch (err) {
+        console.warn("Share cancelled or failed:", err);
+      }
+    }
+    // Fallback: copy to clipboard
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+
+      // temporary popup message
+      const msg = document.createElement("div");
+      msg.textContent = "Link copied! Thank you for sharing 💙";
+      msg.style.position = "fixed";
+      msg.style.bottom = "20px";
+      msg.style.left = "50%";
+      msg.style.transform = "translateX(-50%)";
+      msg.style.background = "#333";
+      msg.style.color = "#fff";
+      msg.style.padding = "8px 14px";
+      msg.style.borderRadius = "8px";
+      msg.style.fontSize = "0.9rem";
+      msg.style.zIndex = "9999";
+      msg.style.opacity = "0";
+      msg.style.transition = "opacity 0.3s ease";
+
+      document.body.appendChild(msg);
+      requestAnimationFrame(() => (msg.style.opacity = "1"));
+
+      setTimeout(() => {
+        msg.style.opacity = "0";
+        setTimeout(() => msg.remove(), 300);
+      }, 2000);
+
+      console.log("✅ Link copied to clipboard");
+    } catch (err) {
+      console.error("❌ Failed to copy link:", err);
+      alert("Couldn't copy link. Try manually!");
+    }
+  });
+}
 
 
+// --- Minimal custom player logic (play/pause, progress, loop) ---
+(function () {
+  const audio = document.getElementById("audioPlayer");
+  const playPauseBtn = document.getElementById("playPauseBtn");
+  const playIcon = document.getElementById("playIcon");
+  const pauseIcon = document.getElementById("pauseIcon");
+  const progressFill = document.getElementById("progressFill");
+  const progressBar = document.getElementById("progressBar");
+  const progressWrap = document.getElementById("progressWrap");
+  const loopBtn = document.getElementById("loopBtn");
+
+  let isSeeking = false;
+
+  function formatTime(s) {
+    if (isNaN(s) || !isFinite(s)) return "0:00";
+    const m = Math.floor(s / 60);
+    const sec = Math.floor(s % 60).toString().padStart(2, "0");
+    return `${m}:${sec}`;
+  }
+
+  // update progress UI
+  audio.addEventListener("timeupdate", () => {
+    if (!isSeeking && audio.duration) {
+      const pct = (audio.currentTime / audio.duration) * 100;
+      progressFill.style.width = pct + "%";
+    }
+  });
+
+  // show duration when metadata loads
+  audio.addEventListener("loadedmetadata", () => {
+    // optional: show duration elsewhere if you want
+  });
+
+  // update play/pause icons when state changes
+  function updatePlayUI(isPlaying) {
+    if (isPlaying) {
+      playIcon.classList.add("hidden");
+      pauseIcon.classList.remove("hidden");
+      if (typeof startRotation === "function") startRotation();
+    } else {
+      playIcon.classList.remove("hidden");
+      pauseIcon.classList.add("hidden");
+      if (typeof stopRotation === "function") stopRotation();
+    }
+  }
+
+  // play/pause toggle (user-initiated)
+  playPauseBtn.addEventListener("click", async () => {
+    try {
+      if (audio.paused) {
+        await audio.play();
+        updatePlayUI(true);
+      } else {
+        audio.pause();
+        updatePlayUI(false);
+      }
+    } catch (err) {
+      console.warn("Playback prevented:", err);
+    }
+  });
+
+  // sync UI to audio events (covers external play/pause)
+  audio.addEventListener("play", () => updatePlayUI(true));
+  audio.addEventListener("pause", () => updatePlayUI(false));
+  audio.addEventListener("ended", () => updatePlayUI(false));
+
+  // seek helpers (pointer friendly)
+  function pctFromEvent(e) {
+    const rect = progressBar.getBoundingClientRect();
+    const clientX = (e.touches ? e.touches[0].clientX : e.clientX);
+    const x = clientX - rect.left;
+    return Math.min(1, Math.max(0, x / rect.width));
+  }
+
+  progressWrap.addEventListener("pointerdown", (e) => {
+    isSeeking = true;
+    progressWrap.setPointerCapture(e.pointerId);
+    const pct = pctFromEvent(e);
+    progressFill.style.width = pct * 100 + "%";
+    if (audio.duration) audio.currentTime = pct * audio.duration;
+  });
+
+  progressWrap.addEventListener("pointermove", (e) => {
+    if (!isSeeking) return;
+    const pct = pctFromEvent(e);
+    progressFill.style.width = pct * 100 + "%";
+    if (audio.duration) audio.currentTime = pct * audio.duration;
+  });
+
+  progressWrap.addEventListener("pointerup", (e) => {
+    isSeeking = false;
+    try { progressWrap.releasePointerCapture(e.pointerId); } catch (err) {}
+  });
+
+  // touch fallback
+  progressWrap.addEventListener("touchstart", (e) => {
+    isSeeking = true;
+    const pct = pctFromEvent(e);
+    progressFill.style.width = pct * 100 + "%";
+    if (audio.duration) audio.currentTime = pct * audio.duration;
+  });
+  progressWrap.addEventListener("touchmove", (e) => {
+    if (!isSeeking) return;
+    const pct = pctFromEvent(e);
+    progressFill.style.width = pct * 100 + "%";
+    if (audio.duration) audio.currentTime = pct * audio.duration;
+  });
+  progressWrap.addEventListener("touchend", () => (isSeeking = false));
+
+  // loop toggle
+  loopBtn.addEventListener("click", () => {
+    audio.loop = !audio.loop;
+    loopBtn.classList.toggle("active", audio.loop);
+    loopBtn.setAttribute("aria-pressed", String(audio.loop));
+  });
+
+  // keyboard: space toggles play (unless typing)
+  document.addEventListener("keydown", (e) => {
+    if (e.code === "Space" && document.activeElement.tagName !== "INPUT") {
+      e.preventDefault();
+      playPauseBtn.click();
+    }
+  });
+})();
+
+// assumes these IDs exist
+const progressTrack = document.getElementById('progressTrack');
+const progressFill = document.getElementById('progressFill');
+const progressKnob = document.getElementById('progressKnob');
+const progressWrap = document.getElementById('progressWrap');
+const audioEl = document.getElementById('audioPlayer');
+
+// call this when timeupdate or when you set progressFill
+function updateKnobPosition() {
+  if (!audioEl.duration || isNaN(audioEl.duration)) return;
+  const pct = (audioEl.currentTime / audioEl.duration) * 100 || 0;
+  progressFill.style.width = pct + '%';
+  // clamp left between 0% and 100%
+  progressKnob.style.left = Math.min(100, Math.max(0, pct)) + '%';
+}
+
+// wire into your existing timeupdate
+audioEl.addEventListener('timeupdate', updateKnobPosition);
+
+// Seeking: pointer-based on track or knob
+let seeking = false;
+
+function pctFromEventOnTrack(e) {
+  const rect = progressTrack.getBoundingClientRect();
+  const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+  const x = clientX - rect.left;
+  return Math.min(1, Math.max(0, x / rect.width));
+}
+
+// --- CLICK TO SEEK ---
+progressTrack.addEventListener("pointerdown", (e) => {
+  seeking = true;
+  const pct = pctFromEventOnTrack(e);
+  audioEl.currentTime = pct * audioEl.duration;
+  updateKnobPosition();
+  progressTrack.setPointerCapture(e.pointerId);
+});
+
+progressTrack.addEventListener("pointermove", (e) => {
+  // only seek while mouse is pressed
+  if (!seeking) return;
+  const pct = pctFromEventOnTrack(e);
+  audioEl.currentTime = pct * audioEl.duration;
+  updateKnobPosition();
+});
+
+progressTrack.addEventListener("pointerup", (e) => {
+  seeking = false;
+  try {
+    progressTrack.releasePointerCapture(e.pointerId);
+  } catch (err) {}
+});
+
+progressTrack.addEventListener("pointerleave", () => {
+  // stop seeking if cursor leaves the area
+  seeking = false;
+});
+
+// --- TOUCH SUPPORT ---
+progressTrack.addEventListener("touchstart", (e) => {
+  seeking = true;
+  const pct = pctFromEventOnTrack(e);
+  audioEl.currentTime = pct * audioEl.duration;
+  updateKnobPosition();
+});
+progressTrack.addEventListener("touchmove", (e) => {
+  if (!seeking) return;
+  const pct = pctFromEventOnTrack(e);
+  audioEl.currentTime = pct * audioEl.duration;
+  updateKnobPosition();
+});
+progressTrack.addEventListener("touchend", () => (seeking = false));

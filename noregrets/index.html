@@ -4,7 +4,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sekar Agny - No Regrets</title>
+  <title>Stream No Regrets by Sekar Agny</title>
+  <link rel="icon" type="image/png" href="favicon.png" />
   <link rel="stylesheet" href="/noregrets/style.css" />
 </head>
 <body>
@@ -13,21 +14,46 @@
     <header>
       <img src="/noregrets/cover-art.jpg" alt="Cover art" class="cover-image" />
       <h1>No Regrets</h1>
-      <h2>by Sekar Agny</h2>
+      <h2>Sekar Agny</h2>
     </header>
 
-    <!-- Player -->
-    <section class="player">
-      <img src="/noregrets/cd.png" alt="Cd Art" class="cd-art" id="cdArt" />
-      <audio id="audioPlayer" controls preload="metadata" controlsList="nodownload noplaybackrate">
-  <source src="/noregrets/your-song.mp3" type="audio/mpeg" />
-</audio>
-    </section>
+    <!-- Player (minimal custom controls) -->
+<section class="player">
+  <img src="/noregrets/cd.png" alt="cdArt" class="cd-art" id="cdArt" />
+
+  <!-- native audio engine (no controls) -->
+  <audio id="audioPlayer" preload="metadata">
+    <source src="/noregrets/your-song.mp3" type="audio/mpeg" />
+  </audio>
+
+<!-- PLAY BUTTON (centered above bar) -->
+  <div class="player-top">
+    <button id="playPauseBtn" class="control-btn" aria-label="Play/Pause">
+      <img src="/noregrets/icon-play.svg" id="playIcon" class="control-icon" alt="Play" />
+      <img src="/noregrets/icon-pause.svg" id="pauseIcon" class="control-icon hidden" alt="Pause" />
+    </button>
+  </div>
+
+  <!-- PROGRESS ROW: track + knob + loop button -->
+  <div class="player-row">
+    <div class="progress-wrap" id="progressWrap" aria-hidden="false">
+      <!-- Use your hand-drawn track as background of .progress-track -->
+      <div id="progressTrack" class="progress-track">
+        <div id="progressFill" class="progress-fill"></div>
+        <div id="progressKnob" class="progress-knob" role="slider" aria-valuemin="0" aria-valuemax="100"></div>
+      </div>
+    </div>
+
+    <button id="loopBtn" class="control-btn loop-btn" aria-pressed="false" aria-label="Loop">
+      <img src="/noregrets/icon-loop.svg" alt="Loop" class="control-icon" />
+    </button>
+  </div>
+</section>
 
 <!-- Online Status -->
 <div class="status-indicator" id="statusIndicator">
-  <span class="dot online"></span>
-  <span class="status-text">Agny is here! Hello!</span>
+  <span class="dot offline"></span>
+  <span class="status-text">Checking status...</span>
 </div>
 
     <!-- Chat -->

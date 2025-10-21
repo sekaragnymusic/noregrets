@@ -1,12 +1,13 @@
 @import url('https://fonts.googleapis.com/css2?family=Indie+Flower&display=swap');
-
+@import url('https://fonts.googleapis.com/css2?family=Homemade+Apple&display=swap');
 
 body {
   font-family: 'Indie Flower', cursive;
-  background: #fffef9 url('/noregrets/paper-texture.jpg');
+  letter-spacing: 0.5px;
+  background: #fffef9 url('/noregrets/plastic-texture.jpg');
   background-size: cover;
   background-position: center;
-  color: #222;
+  color: #203f60;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -55,33 +56,128 @@ header img.cover-image:hover {
 
 /* Header */
 header h1 {
-  font-size: 1.8rem;
+  font-family: 'Homemade Apple', cursive;
+  font-size: 1.4rem;
   margin-bottom: 0;
+  letter-spacing: 0.5px;
 }
 header h2 {
+  font-family: 'Indie Flower', cursive;
   font-size: 1rem;
-  font-weight: normal;
-  margin-bottom: 20px;
-  margin-top: 2px;
-  color: #555;
+  font-weight: bold;
+  margin-top: -2px;
+  margin-bottom: 18px;
+  color: #506164;
+  letter-spacing: 2px;
 }
 
 /* Player */
 .player {
   margin-bottom: 20px;
 }
+/* ---------- Hand-drawn player layout ---------- */
+
+/* container for top (play) */
+.player-top {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 0px; /* space between play and progress */
+}
+
+/* row with progress + loop button */
+.player-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+/* progress area */
+.progress-wrap {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+/* progress track (uses your hand-drawn image as the background) */
+.progress-track {
+  position: relative;
+  margin-left: 10%;
+  width: 100%;
+  height: 10px; /* height of your hand-drawn track */
+  background: url('/noregrets/progress-track.svg') center/100% 100% no-repeat;
+  overflow: visible; /* allows knob to overflow */
+}
+
+
+/* knob (circular indicator) - centered vertically on the track */
+.progress-knob {
+  position: absolute;
+  top: 50%;
+  left: 0%;
+  transform: translate(-50%, -50%);
+  width: 17px;   /* knob diameter — adjust to match your artwork */
+  height: 17px;
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+  background: #405b6f; /* fallback color (matches mockup blue) */
+  z-index: 5;
+  transition: transform 0.08s linear;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+/* play/pause button centered above (uses your SVG) */
+.control-btn {
+  border: none;
+  background: none;
+  padding: 6px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* icon */
+.control-icon {
+  width: 35px; /* make big like your mockup */
+  height: 35px;
+  object-fit: contain;
+}
+.hidden { display: none !important; }
+
+/* loop button on the right of the bar */
+.loop-btn .control-icon {
+  width: 20px;
+  height: 20px;
+}
+
+/* loop active state */
+.loop-btn.active .control-icon {
+  filter: brightness(1.7);
+}
+
+/* responsive tweaks */
+@media (max-width: 480px) {
+  .progress-track { height: 14px; }
+  .progress-knob { width: 24px; height: 24px; }
+  .control-icon { width: 36px; height: 36px; }
+}
+
 .cd-art {
   width: 200px;
   height: 200px;
   border-radius: 50%;
-  margin-bottom: 12px;
+  margin-bottom: 1px;
   transform-origin: center;
   will-change: transform;
   backface-visibility: hidden;
   transform: translateZ(0);
 }
 audio {
-  width: 100%;
+  width: 80%;
 }
 
 /* === Online Status Indicator === */
@@ -112,12 +208,12 @@ audio {
 }
 
 .status-text {
-  color: #333;
+  color:#203f60;
 }
 
 /* === Chat Box === */
 .chat {
-  border: 1px solid #ccc;
+  border: 1px solid #9dadb1;
   border-radius: 10px;
   background-color: #f9f9f9;
   padding: 10px;
@@ -127,6 +223,9 @@ audio {
 
 /* --- Messages --- */
 .chat-messages {
+  font-family: "Indie Flower", cursive;
+  font-size: 0.9rem;
+  letter-spacing: 0.8px;
   height: 140px;
   overflow-y: auto;
   text-align: left;
@@ -138,7 +237,7 @@ audio {
   width: 6px;
 }
 .chat-messages::-webkit-scrollbar-thumb {
-  background: #ccc;
+  background: #a0b2c2;
   border-radius: 10px;
 }
 
@@ -155,7 +254,7 @@ audio {
   flex: 0 0 30%;
   max-width: 30%;
   padding: 6px;
-  border: 1px solid #ccc;
+  border: 1px solid #9dadb1;
   border-radius: 8px;
   background: #fff;
   font-family: inherit;
@@ -167,7 +266,7 @@ audio {
   flex: 1 1 80%;
   max-width: 80%;
   padding: 6px;
-  border: 1px solid #ccc;
+  border: 1px solid #9dadb1;
   border-radius: 8px;
   background: #fff;
   font-family: inherit;
@@ -176,9 +275,8 @@ audio {
 
 /* Send button */
 #sendBtn {
-  flex: 0 0 70px;
-  padding: 6px 0;
-  border: 1px solid #ccc;
+  padding: 6px 6px;
+  border: 1px solid #9dadb1;
   text-align: center;
   border-radius: 8px;
   background: #fff;
@@ -221,12 +319,13 @@ footer {
 }
 
 .msg-name {
+  color:#6d8b8d;
   font-weight: bold;
   margin-right: 4px;
 }
 
 .msg-name.artist {
-  color: #52d0f4; /* your signature color */
+  color: #48c25e; /* your signature color */
   font-family: 'Indie Flower', cursive;
 }
 
@@ -283,8 +382,17 @@ button, input {
   font-family: inherit;
 }
 
+/* generic button hover */
 button:hover {
   background: #f2f2f2;
+}
+
+/* share button hover override (no weird pink box) */
+.share-btn:hover {
+  background: none;
+  transform: scale(1.1);
+  filter: brightness(1.15);
+  transition: transform 0.25s ease, filter 0.25s ease;
 }
 
 /* === Audio Player Cleanup === */
@@ -341,4 +449,21 @@ audio::-webkit-media-controls-playback-rate-button {
     width: 26px;
     height: 26px;
   }
+}
+
+/* === Chat Message Fade-in Animation === */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(7px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.chat-messages div {
+  opacity: 0.7;
+  animation: fadeInUp 0.2s ease forwards;
 }
