@@ -467,3 +467,50 @@ audio::-webkit-media-controls-playback-rate-button {
   opacity: 0.7;
   animation: fadeInUp 0.2s ease forwards;
 }
+
+/* === Countdown Popup === */
+#countdown-popup {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(255, 255, 249, 0.6); /* light transparent paper tone */
+  backdrop-filter: blur(2px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+  transition: opacity 1.5s ease;
+}
+
+/* inner box */
+.countdown-box {
+  background: rgba(251, 255, 255, 0.95);
+  opacity: 0.7;
+  border-radius: 16px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  padding-left: 40px;
+  padding-right: 40px;
+  padding-top: 40px;
+}
+
+/* text + font styles */
+.countdown-text {
+  font-family: 'Indie Flower', cursive;
+  letter-spacing: 0.7px;
+  font-size: 1.1rem;
+  color: #333;
+}
+
+#countdown-timer {
+  font-family: 'Homemade Apple', cursive;
+  font-size: 3rem;
+  color: #222;
+}
+
+/* hide site content until countdown ends */
+body.locked main {
+  opacity: 0.3;
+  filter: blur(1px);
+  pointer-events: none;
+  user-select: none;
+}
