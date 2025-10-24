@@ -10,21 +10,18 @@ console.log("✅ Connected to Supabase");
 // --- LOAD + DISPLAY MESSAGES ---
 const chatMessages = document.getElementById("chatMessages");
 
-// --- LOAD + DISPLAY MESSAGES (last 24 hours only) ---
+// --- LOAD + DISPLAY MESSAGES (maximum 300) ---
 async function loadMessages() {
-  const now = new Date();
-  const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000); // 24 hours ago
-  const since = yesterday.toISOString();
-
   const { data, error } = await supabase
     .from("messages")
     .select("name, text, is_artist, created_at")
-    .gte("created_at", since) // only messages newer than 24h
-    .order("created_at", { ascending: true });
+    .order("created_at", { ascending: true })
+    .limit(300); // show only the latest 300 messages
 
   if (error) return console.error("❌ Load error:", error.message);
   renderMessages(data);
 }
+
 
 function renderMessages(data) {
   const shouldScroll =
