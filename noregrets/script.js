@@ -538,50 +538,9 @@ progressTrack.addEventListener("touchmove", (e) => {
 });
 progressTrack.addEventListener("touchend", () => (seeking = false));
 
-// --- COUNTDOWN POPUP ---
-const countdownPopup = document.getElementById("countdown-popup");
-const countdownTimer = document.getElementById("countdown-timer");
-
-// Set your launch time (local time GMT+7)
-const launchDate = new Date("2025-10-23T18:00:00+07:00");
-
-function updateCountdown() {
-  const now = new Date();
-  const diff = launchDate - now;
-
-  if (diff <= 0) {
-    countdownPopup.style.opacity = 0;
-    setTimeout(() => countdownPopup.remove(), 1000);
-    document.body.classList.remove("locked");
-    return;
-  }
-
-  const hours = Math.floor(diff / (1000 * 60 * 60));
-  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-  const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-
-  countdownTimer.textContent = `${hours
-    .toString()
-    .padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${seconds
-    .toString()
-    .padStart(2, "0")}`;
-}
-
 // only show for listeners, not artist
 if (!IS_ARTIST_MODE) {
   const now = new Date();
 
-  // ✅ Skip countdown entirely if it's already passed
-  if (now >= launchDate) {
-    countdownPopup.remove();
-    document.body.classList.remove("locked");
-  } else {
-    document.body.classList.add("locked");
-    updateCountdown();
-    const timerInterval = setInterval(updateCountdown, 1000);
-  }
-} else {
-  countdownPopup.remove();
-  document.body.classList.remove("locked");
-}
+} 
 
