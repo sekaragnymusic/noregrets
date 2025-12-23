@@ -270,7 +270,7 @@ function updateArtistStatus(isOnline) {
 
 // Load the current status when page opens
 async function loadArtistStatus() {
-  const { data, error } = await supabase
+  const { data, error } = await supabaseClient
     .from("status")
     .select("online")
     .eq("id", 1)
