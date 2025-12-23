@@ -1,9 +1,13 @@
-// --- SUPABASE SETUP ---
+// --- SUPABASE SETUP ---//
 const SUPABASE_URL = 'https://pkmhufszddbjmnpuerzl.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBrbWh1ZnN6ZGRiam1ucHVlcnpsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAyODU5NzEsImV4cCI6MjA3NTg2MTk3MX0.is54Vuker0jWDvarqdIhDa_PNYb_1QjSps-pUtht4qo';
 
 // Create a Supabase client
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const supabaseClient = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
+
 
 console.log("✅ Connected to Supabase");
 
@@ -12,7 +16,7 @@ const chatMessages = document.getElementById("chatMessages");
 
 // --- LOAD + DISPLAY MESSAGES (maximum 300) ---
 async function loadMessages() {
-  const { data, error } = await supabase
+  const { data, error } = await supabaseClient
     .from("messages")
     .select("name, text, is_artist, created_at")
     .order("created_at", { ascending: true })
@@ -89,7 +93,7 @@ async function sendMessage() {
   };
 
   // === Send message to Supabase ===
-  const { error } = await supabase
+  const { error } = await supabaseClient
     .from("messages")
     .insert([{ name, text, is_artist }]);
 
@@ -124,7 +128,7 @@ function appendTempMessage(msg) {
 
 // --- 👂 INITIAL LOAD + REALTIME LISTENER ---
 loadMessages();sendMessage
-supabase
+supabaseClient
   .channel("public:messages")
   .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, (payload) => {
     const msgTime = new Date(payload.new.created_at);
@@ -174,7 +178,7 @@ const IS_ARTIST_MODE = urlParams.get("eggny") === "54";
 async function setOnlineStatus(isOnline) {
   if (!IS_ARTIST_MODE) return; // skip for public users
 
-  const { error } = await supabase
+  const { error } = await supabaseClient
     .from("status")
     .update({ online: isOnline })
     .eq("id", 1);
@@ -191,7 +195,7 @@ if (IS_ARTIST_MODE) {
   const TIMEOUT_DURATION = 30000;   // 30 seconds of no ping = offline
 
   async function sendHeartbeat() {
-    const { error } = await supabase
+    const { error } = await supabaseClient
       .from("status")
       .update({
         online: true,
@@ -278,7 +282,7 @@ async function loadArtistStatus() {
 loadArtistStatus();
 
 // Listen for changes in real time
-supabase
+supabaseClient
   .channel("public:status")
   .on("postgres_changes", { event: "UPDATE", schema: "public", table: "status" }, (payload) => {
     updateArtistStatus(payload.new.online);
